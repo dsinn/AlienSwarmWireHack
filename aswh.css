@@ -1,0 +1,45 @@
+body {
+	background-color: black;
+	color: white;
+	font-family: Arial;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+	margin-right: 16px;
+}
+
+input[type="text"] {
+	margin-left: 8px;
+	text-align: right;
+	width: 32px;
+}
+.stats {
+	padding-left: 8px;
+	text-align: right;
+}
+
+#preload {
+    display: none;
+}
+
+#level {
+    margin-bottom: 1em;
+}
+
+#pipeArea {
+    text-align: center;
+}
+#pipeArea img { /* Weird HTML5 space hack */
+    margin-bottom: -4px;
+}
+#pipeArea table {
+    margin: 0 auto 1em auto;
+}
+#pipeArea td {
+    padding: 0;
+	margin-bottom: 0;
+	vertical-align: top;
+}
+
+img.unconnected {opacity: 0.2;}
