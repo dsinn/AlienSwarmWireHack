@@ -1,6 +1,7 @@
 body {
 	background-color: black;
 	color: white;
+    cursor: url('cursor_active.png') 22 28, auto;/* TODO: implement inactive cursor */
 	font-family: Arial;
 }
 table {
@@ -27,6 +28,17 @@ input[type="text"] {
     margin-bottom: 1em;
 }
 
+[data-type='LR'] { background-image: url('pipeLR.png'); }
+[data-type='TB'] { background-image: url('pipeTB.png'); }
+[data-type='TR'] { background-image: url('pipeTR.png'); }
+[data-type='BR'] { background-image: url('pipeBR.png'); }
+[data-type='BL'] { background-image: url('pipeBL.png'); }
+[data-type='TL'] { background-image: url('pipeTL.png'); }
+
+.setup td {
+    background-image: none;
+}
+
 #pipeArea {
     text-align: center;
 }
@@ -36,10 +48,20 @@ input[type="text"] {
 #pipeArea table {
     margin: 0 auto 1em auto;
 }
+#pipeArea tr:first-child > td:first-child {
+    background: url('pipeStart.png') no-repeat left top;
+    width: 94px;
+}
+#pipeArea tr:first-child > td:last-child {
+    background: url('pipeEnd.png') no-repeat right bottom;
+    width: 184px;
+}
 #pipeArea td {
-    padding: 0;
+    height: 50px;
+    width: 50px;
 	margin-bottom: 0;
+    padding: 0;
 	vertical-align: top;
 }
 
-img.unconnected {opacity: 0.2;}
+.unconnected {opacity: 0.2;}

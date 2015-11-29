@@ -1,93 +1,86 @@
 <!DOCTYPE HTML>
 <html>
-<head>
-<meta charset="UTF-8" />
-<title>Alien Swarm Wire Hack Simulator</title>
-<link rel="stylesheet" type="text/css" href="aswh.css" />
-<script type="text/javascript" src="aswh.js"></script>
-</head>
-<body>
-<div id="preload"></div>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Alien Swarm Wire Hack Simulator</title>
+        <link rel="stylesheet" type="text/css" href="aswh.css" />
+        <script type="text/javascript" src="aswh.js"></script>
+    </head>
+    <body>
+        <div id="preload"></div>
 
-<audio id="sndRotate" src="rotate.wav" preload="auto"></audio>
-<audio id="sndComplete" src="complete.wav" preload="auto"></audio>
+        <audio id="sndRotate" src="rotate.wav" preload="auto"></audio>
+        <audio id="sndComplete" src="complete.wav" preload="auto"></audio>
 
-<div>
-Board dimensions:
-  <select id="level">
-    <option value="2,2,5">Landing Bay</option>
-    <option value="3,2,5">Deima 1</option>
-    <option value="2,2,5">Deima 2</option>
-    <option value="3,3,6">Rydberg Reactor</option>
-    <option value="2,2,5">SynTek Residential</option>
-    <option value="3,2,5">Timor Station</option>
-    <option value="custom">- Custom</option>
-  </select>
-</div>
+        <div>
+            Board dimensions:
+            <select id="level">
+                <option value="2,2,5">Landing Bay</option>
+                <option value="3,2,5">Deima 1</option>
+                <option value="2,2,5">Deima 2</option>
+                <option value="3,3,6">Rydberg Reactor</option>
+                <option value="2,2,5">SynTek Residential</option>
+                <option value="3,2,5">Timor Station</option>
+                <option value="custom">- Custom</option>
+            </select>
+        </div>
 
-<table>
- <tr>
-  <td>
-   <table>
-    <tr>
-     <td>Sets</td>
-     <td><input type="text" id="numSets" value="2" disabled /></td>
-     <td></td>
-    </tr>
+        <table>
+            <tr>
+                <td>
+                    <table>
+                        <tr>
+                            <td>Sets</td>
+                            <td><input type="text" id="numSets" value="2" disabled /></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Rows per set</td>
+                            <td><input type="text" id="numRows" value="2" disabled /></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Columns per row</td>
+                            <td><input type="text" id="numColumns" value="5" disabled /></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <table>
+                        <tr>
+                            <td>Setup timer</td>
+                            <td><input type="text" id="timer" value="2" class="settings" /></td>
+                            <td>sec</td>
+                        </tr>
+                        <tr>
+                            <td>Mute sound</td>
+                            <td style="text-align: right"><input type="checkbox" id="muteSound" /></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <table>
+                        <tr>
+                            <td>Best time:</td>
+                            <td id="statBest" class="stats"> </td>
+                        </tr>
+                        <tr>
+                            <td>Average time:</td>
+                            <td id="statAvg" class="stats"> </td>
+                        </tr>
+                        <tr>
+                            <td>Tries:</td>
+                            <td id="statCount" class="stats"> </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
 
-    <tr>
-     <td>Rows per set</td>
-     <td><input type="text" id="numRows" value="2" disabled /></td>
-     <td></td>
-    </tr>
-
-    <tr>
-     <td>Columns per row</td>
-     <td><input type="text" id="numColumns" value="5" disabled /></td>
-     <td></td>
-    </tr>
-
-   </table>
-  </td>
-
-  <td>
-   <table>
-    <tr>
-     <td>Setup timer</td>
-     <td><input type="text" id="timer" value="2" class="settings" /></td>
-     <td>sec</td>
-    </tr>
-
-    <tr>
-     <td>Mute sound</td>
-     <td style="text-align: right"><input type="checkbox" id="muteSound" /></td>
-     <td></td>
-    </tr>
-   </table>
-  </td>
-
-  <td>
-   <table>
-    <tr>
-     <td>Best time:</td>
-     <td id="statBest" class="stats"> </td>
-    </tr>
-    <tr>
-     <td>Average time:</td>
-     <td id="statAvg" class="stats"> </td>
-    </tr>
-    <tr>
-     <td>Tries:</td>
-     <td id="statCount" class="stats"> </td>
-    </tr>
-   </table>
-  </td>
- </tr>
-
-</table>
-
-<button id="initialize" type="button">Hack</button>
-<div id="pipeArea"></div>
-<p id="message"></p>
-</body>
+        <button id="initialize" type="button">Hack</button>
+        <div id="pipeArea"></div>
+        <p id="message"></p>
+    </body>
 </html>

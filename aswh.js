@@ -1,25 +1,25 @@
+var aswh = aswh || {};
+aswh.PRB_ELBOW = 0.5; // Probability of generating an elbow pipe when a straight pipe is valid
+aswh.PRB_ALIGNED = 0.35; // Probability that a pipe in the generated solution is guaranteed to be aligned
+
 document.addEventListener("DOMContentLoaded", function() {
 "use strict";
 
-var ELBOW_PRB = 0.7; // Probability of generating an elbow pipe when a straight pipe is valid
-var ALIGNED_PRB = 0.35; // Probability that a pipe in the generated solution is guaranteed to be aligned
+var sets, // Number of sets
+    rows, // Number of rows per set
+    columns; // Number of columns per row
 
-var sets; // Number of sets
-var rows; // Number of rows per set
-var columns; // Number of columns per row
+var cellPipe, // 3D array where [i][j][k] is the type of pipe at row j, column k of set i
+    connected, // 3D array whose values are true iff the corresponding pipe is connected to the start
+    pipeElems,
+    chain, // 3D array where ([i][j][0], [i][j][1]) are the coordinates of the (j-1)th pipe in the chain of set i
+    inProgress = []; // inProgress[i] === false iff set i is finished
 
-var cellPipe; // 3D array where [i][j][k] is the type of pipe at row j, column k of set i
-var connected; // 3D array whose values are true iff the corresponding pipe is connected to the start
-var imgElem; // imgElem[i][j][k] is the Image element at set i, row j, column k
-var chain; // 3D array where ([i][j][0], [i][j][1]) are the coordinates of the (j-1)th pipe in the chain of set i
-var inProgress = []; // inProgress[i] === false iff set i is finished
-var ready; // True iff the ready timer has expired
+var startTime, // The date at which the puzzles were created
+    countCompleted, // Counter for the number of sets completed so far
+    timeStats = {}; // A hash table that maps from "sets,rows,columns" to the best/average times of that board
 
-var startTime; // The date at which the puzzles were created
-var countCompleted; // Counter for the number of sets completed so far
-var timeStats = {}; // A hash table that maps from "sets,rows,columns" to the best/average times of that board
-
-var imgMap = [ // Types of pipes
+var pipeMap = [ // Types of pipes
     "LR", // left-right
     "TB", // top-bottom
     "TR", // top-right
@@ -32,15 +32,14 @@ var imgMap = [ // Types of pipes
 var rot = [1, 0, 3, 4, 5, 2];
 
 // left[i] === true iff a pipe of type i connects to the left
-var left =  [true,  false, false, false, true,  true];
-var right = [true,  false, true,  true,  false, false];
-var up =    [false, true,  true,  false, false, true];
-var down =  [false, true,  false, true,  true,  false];
+var left =  [true,  false, false, false, true,  true],
+    right = [true,  false, true,  true,  false, false],
+    up =    [false, true,  true,  false, false, true],
+    down =  [false, true,  false, true,  true,  false];
 
-var hasAudio = !!document.createElement("audio").canPlayType;
-var MAX_AUDIO_CHANNELS;
-var audioChannels;
-// storiesinflight.com HTML5 Audio and JavaScript Control
+var hasAudio = !!document.createElement("audio").canPlayType,
+    MAX_AUDIO_CHANNELS,
+    audioChannels;
 if (hasAudio) {
     MAX_AUDIO_CHANNELS = 8;
     audioChannels = new Array(MAX_AUDIO_CHANNELS);
@@ -51,7 +50,7 @@ if (hasAudio) {
     }
 }
 function playSound(s) {
-    if (hasAudio && !document.getElementById("muteSound").checked && ready) {
+    if (hasAudio && !document.getElementById("muteSound").checked) {
         for (var i = 0; i < audioChannels.length; i++) {
             var theTime = new Date().getTime();
             if (audioChannels[i].endTime < theTime) {
@@ -80,17 +79,16 @@ function validDimensions(sets, rows, columns) {
 }
 
 function startGame() {
-    ready = true;
-    for (var i = 0; i < sets; i++)
-        for (var j = 0; j < rows; j++)
-            for (var k = 0; k < columns; k++)
-                draw(imgElem[i][j][k]);
+    document.getElementById("pipeArea").className = "";
     startTime = new Date().getTime();
+
+    for (var i = 0; i < sets; i++) {
+        inProgress[i] = true;
+    }
 }
 
 /** Create the puzzle. */
 function initialize() {
-    ready = false;
     countCompleted = 0;
 
     var divMessage = document.getElementById("message");
@@ -108,11 +106,12 @@ function initialize() {
     if (!validDimensions(sets, rows, columns)) return;
 
     var divPipe = document.getElementById("pipeArea");
+    divPipe.className = "setup";
     while (divPipe.firstChild) divPipe.removeChild(divPipe.firstChild);
 
     cellPipe   = new Array(sets);
     connected  = new Array(sets);
-    imgElem    = new Array(sets);
+    pipeElems  = new Array(sets);
     chain      = new Array(sets);
     inProgress = new Array(sets);
 
@@ -121,48 +120,38 @@ function initialize() {
 
         cellPipe[i] = new Array(rows);
         connected[i] = new Array(rows);
-        imgElem[i] = new Array(rows);
+        pipeElems[i] = new Array(rows);
         chain[i] = [];
-        inProgress[i] = true;
+        inProgress[i] = false;
 
         var row = new Array(rows);
         for (var j = 0; j < rows; j++)
             row[j] = table.insertRow(j);
 
-        var imgStart = document.createElement("img");
-        imgStart.src = "pipeStart.png";
         var firstCell = row[0].insertCell(0);
         firstCell.rowSpan = rows;
-        firstCell.appendChild(imgStart);
 
         for (var j = 0; j < rows; j++) {
             cellPipe[i][j] = new Array(columns);
             connected[i][j] = new Array(columns);
-            imgElem[i][j] = new Array(columns);
+            pipeElems[i][j] = new Array(columns);
 
-            var temp = j === 0 ? 1 : 0;
             for (var k = 0; k < columns; k++) {
-                var imgPipe = document.createElement("img");
-                imgPipe.src = "blank.png";
-                imgPipe.set = i;
-                imgPipe.row = j;
-                imgPipe.col = k;
-                imgElem[i][j][k] = imgPipe;
+                var cell = row[j].insertCell(-1);
+                cell.setAttribute("data-set", i);
+                cell.setAttribute("data-row", j);
+                cell.setAttribute("data-col", k);
+                cell.className = 'unconnected';
+                cell.oncontextmenu = function() { return false; } // Disable right-click
 
-                var cell = row[j].insertCell(k + temp);
-                cell.appendChild(imgPipe);
+                pipeElems[i][j][k] = cell;
                 cellPipe[i][j][k] = -1;
             }
         }
 
-        var lastCell = row[0].insertCell(columns + 1);
+        var lastCell = row[0].insertCell(-1);
         lastCell.rowSpan = rows;
-        lastCell.style.verticalAlign = "bottom"; // wut
-        var imgEnd = document.createElement("img");
-        imgEnd.src = "pipeEnd.png";
-        imgEnd.className = "unconnected";
-        imgEnd.id = "end" + i;
-        lastCell.appendChild(imgEnd);
+        lastCell.className = 'unconnected';
 
         divPipe.appendChild(table);
         randomize(i);
@@ -171,24 +160,18 @@ function initialize() {
     window.setTimeout(startGame, countdown);
 }
 
-/** Redraw the given Image element according to its corresponding state in the game. */
-function draw(img) {
-    img.className = connected[img.set][img.row][img.col] ? "" : "unconnected";
-    img.src = "pipe" + imgMap[cellPipe[img.set][img.row][img.col]] + ".png";
-}
-
 /** Create a random puzzle for set i. */
 function randomize(i) {
-    var direction = 0; // right, up, down = 0, 1, 2
+    var direction = 0; // (right, up, down) = (0, 1, 2)
     var j = 0, k = 0;
     while (k < columns - 1) {
-        var aligned = Math.random() < ALIGNED_PRB;
+        var aligned = Math.random() < aswh.PRB_ALIGNED;
         if (j === 0 && direction === 1 || j === rows - 1 && direction === 2) {
             // At the top or bottom row with a connected pipe below/above
             cellPipe[i][j][k] = aligned ? 4 - direction : randomPipe(true);
             direction = 0;
         } else {
-            if (Math.random() > ELBOW_PRB) {
+            if (Math.random() > aswh.PRB_ELBOW) {
                 cellPipe[i][j][k] = aligned ? Math.ceil(direction / 2) : randomPipe(false);
             } else {
                 if (direction > 0) {
@@ -210,26 +193,32 @@ function randomize(i) {
             }
         }
 
+        pipeElems[i][j][k].setAttribute('data-type', pipeMap[cellPipe[i][j][k]]);
+
         if (direction === 0)        k++;
         else if (direction === 1)   j--;
         else if (direction === 2)   j++;
     }
 
     if (j === rows - 1) {
-        cellPipe[i][j][k] = Math.random() < ALIGNED_PRB ? 0 : randomPipe(false);
+        cellPipe[i][j][k] = Math.random() < aswh.PRB_ALIGNED ? 0 : randomPipe(false);
+        pipeElems[i][j][k].setAttribute('data-type', pipeMap[cellPipe[i][j][k]]);
     } else {
-        cellPipe[i][j][k] = Math.random () < ALIGNED_PRB ? 4 : randomPipe(true);
+        cellPipe[i][j][k] = Math.random () < aswh.PRB_ALIGNED ? 4 : randomPipe(true);
+        pipeElems[i][j][k].setAttribute('data-type', pipeMap[cellPipe[i][j][k]]);
         for (var y = j + 1; y < rows - 1; y++) {
-            cellPipe[i][y][k] = Math.random() < ALIGNED_PRB ? 1 : randomPipe(false);
+            cellPipe[i][y][k] = Math.random() < aswh.PRB_ALIGNED ? 1 : randomPipe(false);
+            pipeElems[i][y][k].setAttribute('data-type', pipeMap[cellPipe[i][y][k]]);
         }
-        cellPipe[i][rows - 1][k] = Math.random() < ALIGNED_PRB ? 2 : randomPipe(true);
+        cellPipe[i][rows - 1][k] = Math.random() < aswh.PRB_ALIGNED ? 2 : randomPipe(true);
+        pipeElems[i][rows - 1][k].setAttribute('data-type', pipeMap[cellPipe[i][rows - 1][k]]);
     }
 
     for (var y = 0; y < rows; y++) {
         for (var x = 0; x < columns; x++) {
             if (cellPipe[i][y][x] === -1) {
-                var elbow = Math.random() < ELBOW_PRB;
-                cellPipe[i][y][x] = randomPipe(elbow);
+                cellPipe[i][y][x] = randomPipe(Math.random() < aswh.PRB_ELBOW);
+                pipeElems[i][y][x].setAttribute('data-type', pipeMap[cellPipe[i][y][x]]);
             }
         }
     }
@@ -250,10 +239,11 @@ function randomPipe(elbow) {
 
 /** Rotate the pipe corresponding to the Image element e. */
 function rotate(e) {
-    var i = e.set,
-        j = e.row,
-        k = e.col;
+    var i = parseInt(e.getAttribute("data-set"), 10),
+        j = parseInt(e.getAttribute("data-row"), 10),
+        k = parseInt(e.getAttribute("data-col"), 10);
     cellPipe[i][j][k] = rot[cellPipe[i][j][k]];
+    e.setAttribute("data-type", pipeMap[cellPipe[i][j][k]]);
     checkConnections(i, j, k);
     playSound("sndRotate");
 }
@@ -269,7 +259,7 @@ function checkConnections(i, j, k) {
             // the chain around that point. Disconnect every pipe after it.
             lastElement = chain[i].pop();
             connected[i][lastElement[0]][lastElement[1]] = false;
-            if (ready) draw(imgElem[i][lastElement[0]][lastElement[1]]);
+            pipeElems[i][lastElement[0]][lastElement[1]].className = 'unconnected';
         } while(position[0] !== lastElement[0] || position[1] !== lastElement[1]);
     }
 
@@ -279,6 +269,7 @@ function checkConnections(i, j, k) {
             x = 0;
             y = 0;
             connected[i][0][0] = true;
+            pipeElems[i][0][0].className = '';
             chain[i].push([0, 0]);
         }
     } else {
@@ -292,7 +283,6 @@ function checkConnections(i, j, k) {
     if (x !== undefined) {
         // Check for pipes in the chain starting at (y, x)
         while (true) {
-            if (ready) draw(imgElem[i][y][x]);
             var flag = true;
             if (left[cellPipe[i][y][x]] && x > 0 && right[cellPipe[i][y][x - 1]]
                     && !connected[i][y][x - 1]) {
@@ -312,30 +302,26 @@ function checkConnections(i, j, k) {
 
             if (flag) {
                 connected[i][y][x] = true;
+                pipeElems[i][y][x].className = '';
                 chain[i].push([y, x]);
             } else {
                 break;
             }
         }
     }
-    if (ready) draw(imgElem[i][j][k]);
 
     if (connected[i][rows - 1][columns - 1]
             && right[cellPipe[i][rows - 1][columns - 1]]) {
-        if (!ready) {
+        if (!inProgress[i]) {
             // Game hasn't even started, so reconstruct puzzle
-            randomize(i);
-            return;
+            return randomize(i);
         }
 
         // Set is complete
         inProgress[i] = false;
         countCompleted++;
         playSound("sndComplete");
-
-        // Light up the last image
-        var imgEnd = document.getElementById("end" + i);
-        imgEnd.className = "";
+        pipeElems[i][0][0].parentNode.lastChild.className = '';
 
         if (countCompleted === sets) {
             // Display time elapsed
@@ -399,8 +385,8 @@ function showStats() {
 
 // Preload the images of the pipes
 var imageNames = ["pipeStart", "pipeEnd"];
-for (var i = 0; i < imgMap.length; i++)
-    imageNames.push("pipe" + imgMap[i]);
+for (var i = 0; i < pipeMap.length; i++)
+    imageNames.push("pipe" + pipeMap[i]);
 
 var container = document.getElementById("preload");
 for (var i = 0; i < imageNames.length; i++) {
@@ -409,10 +395,9 @@ for (var i = 0; i < imageNames.length; i++) {
     container.appendChild(img);
 }
 
-document.getElementById("pipeArea").addEventListener("click", function(evt) {
-    if (ready && inProgress[evt.target.set]) {
+document.getElementById("pipeArea").addEventListener("mousedown", function(evt) {
+    if (evt.target.hasAttribute("data-set") && inProgress[evt.target.getAttribute("data-set")]) {
         rotate(evt.target);
-        evt.stopPropagation();
     }
 });
 
