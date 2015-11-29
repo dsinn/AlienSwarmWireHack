@@ -1,23 +1,23 @@
 body {
-	background-color: black;
-	color: white;
+    background-color: black;
+    color: white;
     cursor: url('cursor_active.png') 22 28, auto;/* TODO: implement inactive cursor */
-	font-family: Arial;
+    font-family: Arial;
 }
 table {
-	border-collapse: collapse;
-	border-spacing: 0;
-	margin-right: 16px;
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-right: 16px;
 }
 
 input[type="text"] {
-	margin-left: 8px;
-	text-align: right;
-	width: 32px;
+    margin-left: 8px;
+    text-align: right;
+    width: 32px;
 }
 .stats {
-	padding-left: 8px;
-	text-align: right;
+    padding-left: 8px;
+    text-align: right;
 }
 
 #preload {
@@ -59,9 +59,9 @@ input[type="text"] {
 #pipeArea td {
     height: 50px;
     width: 50px;
-	margin-bottom: 0;
+    margin-bottom: 0;
     padding: 0;
-	vertical-align: top;
+    vertical-align: top;
 }
 
 .unconnected {opacity: 0.2;}
