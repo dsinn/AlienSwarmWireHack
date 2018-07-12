@@ -1,31 +1,5 @@
 body {
-    background-color: black;
-    color: white;
     cursor: url('cursor_active.png') 22 28, auto;/* TODO: implement inactive cursor */
-    font-family: Arial;
-}
-table {
-    border-collapse: collapse;
-    border-spacing: 0;
-    margin-right: 16px;
-}
-
-input[type="text"] {
-    margin-left: 8px;
-    text-align: right;
-    width: 32px;
-}
-.stats {
-    padding-left: 8px;
-    text-align: right;
-}
-
-#preload {
-    display: none;
-}
-
-#level {
-    margin-bottom: 1em;
 }
 
 [data-type='LR'] { background-image: url('pipeLR.png'); }

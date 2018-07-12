@@ -1,10 +1,51 @@
-<!DOCTYPE HTML>
-<html>
+<!doctype html>
+<html lang="en">
     <head>
         <meta charset="UTF-8" />
+        <meta name="description" content="A JavaScript-based tool for practicing wire hacks in Alien Swarm." />
+        <meta name="theme-color" content="#4d8ccc" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Alien Swarm Wire Hack Simulator</title>
-        <link rel="stylesheet" type="text/css" href="aswh.css" />
-        <script type="text/javascript" src="aswh.js"></script>
+        <style>
+body {
+    background-color: black;
+    color: white;
+    font-family: Arial;
+}
+body, button, input, select, textarea {
+    font-size: 16px;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-right: 16px;
+}
+
+input[type="text"] {
+    margin-left: 8px;
+    text-align: right;
+    width: 32px;
+}
+
+.stats {
+    padding-left: 8px;
+    text-align: right;
+}
+
+#preload {
+    display: none;
+}
+
+#level {
+    margin-bottom: 1em;
+}
+
+#muteSound {
+    float: right;
+}
+        </style>
+        <link rel="manifest" href="asw_wire_hack.webmanifest" />
     </head>
     <body>
         <div id="preload"></div>
@@ -13,7 +54,7 @@
         <audio id="sndComplete" src="complete.wav" preload="auto"></audio>
 
         <div>
-            Board dimensions:
+            <label for="level">Board dimensions:</label>
             <select id="level">
                 <option value="2,2,5">Landing Bay</option>
                 <option value="3,2,5">Deima 1</option>
@@ -30,17 +71,17 @@
                 <td>
                     <table>
                         <tr>
-                            <td>Sets</td>
+                            <td><label for="numSets">Sets</label></td>
                             <td><input type="text" id="numSets" value="2" disabled /></td>
                             <td></td>
                         </tr>
                         <tr>
-                            <td>Rows per set</td>
+                            <td><label for="numRows">Rows per set</label></td>
                             <td><input type="text" id="numRows" value="2" disabled /></td>
                             <td></td>
                         </tr>
                         <tr>
-                            <td>Columns per row</td>
+                            <td><label for="numColumns">Columns per row</label></td>
                             <td><input type="text" id="numColumns" value="5" disabled /></td>
                             <td></td>
                         </tr>
@@ -49,13 +90,13 @@
                 <td>
                     <table>
                         <tr>
-                            <td>Setup timer</td>
+                            <td><label for="timer">Setup timer</label></td>
                             <td><input type="text" id="timer" value="2" class="settings" /></td>
                             <td>sec</td>
                         </tr>
                         <tr>
-                            <td>Mute sound</td>
-                            <td style="text-align: right"><input type="checkbox" id="muteSound" /></td>
+                            <td><label for="muteSound">Mute sound</label></td>
+                            <td><input type="checkbox" id="muteSound" /></td>
                             <td></td>
                         </tr>
                     </table>
@@ -82,5 +123,8 @@
         <button id="initialize" type="button">Hack</button>
         <div id="pipeArea"></div>
         <p id="message"></p>
+
+        <script src="aswh.js"></script>
+        <link rel="stylesheet" type="text/css" href="aswh.css" />
     </body>
 </html>
